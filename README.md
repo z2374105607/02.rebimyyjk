@@ -4,3 +4,5 @@
 ![瘦小的圆角矩形](https://img.shields.io/badge/mysql-5.6-brightgreen.svg?style=plastic)  
 运营监控平台
 ======
+#编译运行
+#技术总结
