@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- 从服务端返回xml中提取参数（专对wmts类型地图），value优先（当value有值时取value值，无值时从parserFiled指定的节点中获取） -->
+<parsers>
+ <parser name="WMSParser" type="M" resourcType="xml">
+   <layerId parserFiled="" value=""/>
+   <style parserFiled="" value=""/>
+   <matrixIds parserFiled="" value=""/>
+   <matrixSet parserFiled="" value=""/>
+   <format parserFiled="" value=""/>
+   <resolutions parserFiled="" value=""/>
+   <requestEncoding parserFiled="" value=""/>
+   <maxExtent parserFiled="" value=""/>
+   <tileOrigin parserFiled="" value=""/>
+ </parser>
+  <parser name="WMTSParser" type="T" resourcType="xml">
+   <layerId parserFiled="" value=""/>
+   <style parserFiled="" value=""/>
+   <matrixIds parserFiled="" value=""/>
+   <matrixSet parserFiled="" value=""/>
+   <format parserFiled="" value=""/>
+   <resolutions parserFiled="" value=""/>
+   <requestEncoding parserFiled="" value=""/>
+   <maxExtent parserFiled="" value=""/>
+   <tileOrigin parserFiled="" value=""/>
+ </parser>
+  <parser name="WFSParser" type="F" resourcType="xml">
+   <layerId parserFiled="" value=""/>
+   <style parserFiled="" value=""/>
+   <matrixIds parserFiled="" value=""/>
+   <matrixSet parserFiled="" value=""/>
+   <format parserFiled="" value=""/>
+   <resolutions parserFiled="" value=""/>
+   <requestEncoding parserFiled="" value=""/>
+   <maxExtent parserFiled="" value=""/>
+   <tileOrigin parserFiled="" value=""/>
+ </parser>
+   <parser name="SFSParser" type="S" resourcType="xml">
+   <layerId parserFiled="" value=""/>
+   <style parserFiled="" value=""/>
+   <matrixIds parserFiled="" value=""/>
+   <matrixSet parserFiled="" value=""/>
+   <format parserFiled="" value=""/>
+   <resolutions parserFiled="" value=""/>
+   <requestEncoding parserFiled="" value=""/>
+   <maxExtent parserFiled="" value=""/>
+   <tileOrigin parserFiled="" value=""/>
+ </parser>
+ <!-- 自定义解析器 -->
+ <parser name="UTMParser" type="U" resourcType="xml or json">
+ </parser>
+</parsers>

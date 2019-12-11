@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>add symbol</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-select.min.js"></script>
+    <script src="./js/slider.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/tooltip.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;background-color: #000000;
+        }
+        input[type=range] {
+            width: 170px;
+        }
+        label{
+            display: inline-block;
+            margin: 5px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+
+        .dropdown-container{
+            display: block;
+            position: absolute;
+            top: 100%;
+            box-sizing: border-box;
+            left: 0;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            urser-select: none;
+            -webkit-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -webkit-transform 0.2s ease-in;
+            -moz-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -moz-transform 0.2s ease-in;
+            transition: visibility 0s 0.2s, opacity 0.2s ease-in, transform 0.2s
+            ease-in;
+            -webkit-transform: translate(0, -20%);
+            -moz-transform: translate(0, -20%);
+            transfor: translate(0, -20%);
+            opacity: 0;
+            visibility: hidden;
+            border: 1px solid #444;
+            background-color: rgba(38, 38, 38, 0.75);
+            margin: 9px;
+            color: white;
+        }
+        .dropdown-visible{
+            -webkit-transform: translate(0, 0);
+            -moz-transform: translate(0, 0);
+            transform: translate(0, 0);
+            visibility: visible;
+            opacity: 1;
+            -webkit-transition: opacity 0.2s ease-out, -webkit-transform 0.2s
+            ease-out;
+            -moz-transition: opacity 0.2s ease-out, -moz-transform 0.2s ease-out;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+        .items-wraper{
+            display: block;
+            position: relative;
+            top: auto;
+            right: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: 400px;
+            text-align: left;
+            width: 170px;
+        }
+        .item{
+            display: inline-block;
+            vertical-align: top;
+            margin: 5px;
+            width: 140px;
+            text-align: center;
+            cursor: pointer;
+            position : relative;
+        }
+        .item-icon{
+            display: inline-block;
+            position: relative;
+            width: inherit;
+            height: 100px;
+            background-size: 100% 100%;
+            color: #edffff;
+            box-sizing: border-box;
+            border: 3px solid #ffffff;
+        }
+        .drawCur{
+            cursor: url(./images/cur/draw.cur), auto;
+        }
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<div id="toolbar" style="position: absolute;top: 5px;left: 5px;display: none;">
+    <button type="button" id="styleSetting" class="button black">风格设置</button>
+    <button type="button" id="flatten" class="button black">压平</button>
+    <div id="dropdown" class="dropdown-container">
+        <div id="items-group">
+            <div id="symbolItems" class="items-wraper">
+            </div>
+        </div>
+    </div>
+    <div>
+        <label>旋转</label><input id="rotate" type="range" min="0" max="360" step="1.0" title="模型旋转角度" data-bind="value: rotation, valueUpdate: 'input'">
+    </div>
+    <div>
+        <label>缩放</label><input type="range" id="scale" min="1" max="10" step="0.1" title="模型缩放比例" data-bind="value: scale, valueUpdate: 'input'">
+    </div>
+</div>
+<script>
+    var s3mInstanceColc,handlerPoint,handlerPolygon;
+    var defaultUrl = './SampleData/models/springTree.s3m';
+    var cache = {};
+    function onload(Cesium) {
+        document.getElementById("styleSetting").onclick = function() {
+            var $el = $('#dropdown');
+            if($el.hasClass('dropdown-visible')){
+                $('#dropdown').removeClass('dropdown-visible');
+            }
+            else{
+                $('#dropdown').removeClass('dropdown-visible').addClass('dropdown-visible');
+            }
+        };
+        var viewer = new Cesium.Viewer('cesiumContainer');
+        var scene = viewer.scene;
+        var viewModel = {
+            rotation : 1.0,
+            scale : 1.0
+        };
+
+        Cesium.knockout.track(viewModel);
+        var toolbar = document.getElementById('toolbar');
+        Cesium.knockout.applyBindings(viewModel, toolbar);
+        Cesium.knockout.getObservable(viewModel,'rotation').subscribe(
+                function(newValue) {
+                    var rotationValue = Cesium.Math.toRadians(newValue);
+                    s3mInstanceColc.hpr  = new Cesium.HeadingPitchRoll(rotationValue);
+                }
+        );
+        Cesium.knockout.getObservable(viewModel,'scale').subscribe(
+                function(newValue) {
+                    var scale = parseFloat(newValue);
+                    s3mInstanceColc.scale = new Cesium.Cartesian3(scale,scale,scale);
+                }
+        );
+
+        Cesium.loadJson('http://support.supermap.com:8090/plugin/s3mLibrary/s3mModels.json').then(function(data){
+            var result = data.s3mModels;
+            for(var i = 0,j = result.length;i < j;i++){
+                addItem(result[i]);
+            }
+        });
+        var promise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_SRSB,{
+            name : 'srsb'
+        });
+        Cesium.when(promise,function(layer){
+            //设置相机位置，定位至模型
+            scene.camera.setView({
+                destination:new Cesium.Cartesian3.fromDegrees(13.043020669014005,47.80938240691388,136.22656377766077),
+                orientation:{
+                    heading:0.5007521476695089,
+                    pitch:-0.14422822965773707,
+                    roll:4.886935300874029e-11
+                }
+            });
+            if(!scene.pickPositionSupported){
+                alert('不支持深度纹理,无法进行鼠标交互绘制！');
+            }
+            var tooltip = createTooltip(document.body);
+            handlerPolygon = new Cesium.DrawHandler(viewer,Cesium.DrawMode.Polygon);
+            handlerPolygon.activeEvt.addEventListener(function(isActive){
+                if(isActive == true){
+                    viewer.enableCursorStyle = false;
+                    viewer._element.style.cursor = '';
+                    $('body').removeClass('drawCur').addClass('drawCur');
+                }
+                else{
+                    viewer.enableCursorStyle = true;
+                    $('body').removeClass('drawCur');
+                }
+            });
+            handlerPolygon.movingEvt.addEventListener(function(windowPosition){
+                if(windowPosition.x < 210 && windowPosition.y < 120){
+                    tooltip.setVisible(false);
+                    return ;
+                }
+                if(handlerPolygon.isDrawing){
+                    tooltip.showAt(windowPosition,'<p>点击确定压平区域中间点</p><p>右键单击结束绘制</p>');
+                }
+                else{
+                    tooltip.showAt(windowPosition,'<p>点击绘制压平区域第一个点</p>');
+                }
+            });
+            handlerPolygon.drawEvt.addEventListener(function(result){
+                handlerPolygon.polygon.show = false;
+                handlerPolygon.polyline.show = false;
+                var polygon = result.object;
+                var positions = polygon.positions;
+                var flatPoints = [];
+                for(var i = 0,j = positions.length;i < j;i++){
+                    var position = positions[i];
+                    var cartographic = Cesium.Cartographic.fromCartesian(position);
+                    var lon = Cesium.Math.toDegrees(cartographic.longitude);
+                    var lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    var height = cartographic.height;
+                    flatPoints.push(lon);
+                    flatPoints.push(lat);
+                    flatPoints.push(height);
+                }
+                layer.addFlattenRegion({
+                    position : flatPoints,
+                    name : 'flatten' + Math.random()
+                });
+                handlerPoint.activate();
+            });
+
+            handlerPoint = new Cesium.DrawHandler(viewer,Cesium.DrawMode.Point);
+            handlerPoint.activeEvt.addEventListener(function(isActive){
+                if(isActive == true){
+                    viewer.enableCursorStyle = false;
+                    viewer._element.style.cursor = '';
+                    $('body').removeClass('drawCur').addClass('drawCur');
+                }
+                else{
+                    viewer.enableCursorStyle = true;
+                    $('body').removeClass('drawCur');
+                }
+            });
+
+            handlerPoint.movingEvt.addEventListener(function(windowPosition){
+                if(windowPosition.x < 210 && windowPosition.y < 120){
+                    tooltip.setVisible(false);
+                    return ;
+                }
+                tooltip.showAt(windowPosition,'<p>点击添加小品</p>');
+            });
+            handlerPoint.drawEvt.addEventListener(function(result){
+                handlerPoint.clear();
+                var point = result.object;
+                var heading = Cesium.Math.toRadians(parseFloat($('#rotate').val()));
+                var hpr = new Cesium.HeadingPitchRoll(heading,0,0);
+                var scale = parseFloat($('#scale').val());
+                if((!s3mInstanceColc || defaultUrl != s3mInstanceColc._url) && !cache[defaultUrl]){
+                    s3mInstanceColc = scene.addS3MInstanceCollection(defaultUrl,[{
+                        position : point.position,
+                        hpr : hpr,
+                        scale : new Cesium.Cartesian3(scale,scale,scale)
+                    }]);
+                    cache[defaultUrl] = s3mInstanceColc;
+                }
+                else{
+                    if(cache[defaultUrl]){
+                        s3mInstanceColc = cache[defaultUrl];
+                    }
+                    s3mInstanceColc.add({
+                        position : point.position,
+                        hpr : hpr,
+                        scale : new Cesium.Cartesian3(scale,scale,scale)
+                    });
+                }
+                handlerPoint.activate();
+            });
+
+            document.getElementById("flatten").onclick = function() {
+                handlerPoint && handlerPoint.deactivate();
+                handlerPolygon && handlerPolygon.activate();
+            };
+
+        });
+
+        function addItem(data){
+            var str = '<div class="item" ><div class="item-icon"><img style="width: 100%;height: 100%;" src={thumbnail}></div><div>{name}</div></div>'.replace('{thumbnail}',data.thumbnail).replace('{name}',data.name);
+            var $el = $('#symbolItems').append(str);
+            var $child = $el.children('div.item:last-child');
+            $child.on('click',function(){
+                defaultUrl = data.path;
+                $('#dropdown').removeClass('dropdown-visible');
+                handlerPolygon && handlerPolygon.deactivate();
+                handlerPoint && handlerPoint.activate();
+            });
+        }
+
+        $('#toolbar').show();
+        $('#loadingbar').remove();
+    }
+</script>
+</body>
+</html>

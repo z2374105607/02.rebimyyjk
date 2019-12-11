@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>鸟巢水面特效</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/config.js"></script>
+	<script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;background-color: #000000;
+        }
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    function onload(Cesium) {
+        //初始化viewer部件
+        var viewer = new Cesium.Viewer('cesiumContainer');
+        var scene = viewer.scene;
+        var widget = viewer.cesiumWidget;
+        $('#loadingbar').remove();
+        try{
+            //添加鸟巢建筑图层
+            var promise1 = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_NIAOCHAO,{name : 'niaochao'});
+            //添加鸟巢水面图层
+            var promise2 = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_NIAOCHAO_WATER,{name : 'water'});
+            Cesium.when.all([promise1,promise2],function(layers){
+                //查找水面图层
+                var waterLayer=scene.layers.find('water');
+                var style=new Cesium.Style3D();
+                //调整水面图层的底部高程，确保水面与模型贴合
+                style.bottomAltitude = -4.8;
+                waterLayer.style3D = style;
+                //修改风格后需刷新
+                waterLayer.refresh();
+                //设置相机位置、视角，便于观察场景
+                scene.camera.setView({
+                    destination : new Cesium.Cartesian3.fromDegrees(116.3899,40.0001,110.0),
+                    orientation : {
+                        heading :3.5722815225236584,
+                        pitch :-0.35756382305481216,
+                        roll : 2.602362769721367e-13
+                    }
+                });
+            },function(){
+                var title = '加载SCP失败，请检查网络连接状态或者url地址是否正确？';
+                widget.showErrorPanel(title, undefined, e);
+            });
+        }
+        catch(e){
+            if (widget._showRenderLoopErrors) {
+                var title = '渲染时发生错误，已停止渲染。';
+                widget.showErrorPanel(title, undefined, e);
+            }
+        }
+    }
+    </script>
+</body>
+</html>

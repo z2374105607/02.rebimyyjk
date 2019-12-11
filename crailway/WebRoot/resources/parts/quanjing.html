@@ -1,0 +1,58 @@
+ <!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+		#panorama {width:100%; height: 0px;}
+		#result {width:100%;font-size:12px;}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=YmjZKpkdRTbqXtbxzwXhQnGZRMAxMSaM"></script>
+	<title></title>
+</head>
+<body>
+	<div style="margin-top: 59px;" id="panorama"></div>
+</body>
+</html>
+<script type="text/javascript"> 
+
+	var panorama = new BMap.Panorama('panorama'); 
+	panorama.setPov({heading: -40, pitch: 6});
+		showqj();
+	//坐标转换完之后的回调函数
+    translateCallback = function (data){
+      if(data.status === 0) {
+		panorama.setPosition(new BMap.Point(data.points[0].lng,data.points[0].lat)); //根据经纬度坐标展示全景图	
+
+	    var oDiv=document.getElementById('panorama');
+        oDiv.style.width='100%';
+        oDiv.style.height='100%';	
+      }
+    }
+	function timedMsg()
+　　{
+		var ggPoint = new BMap.Point(getUrlVars()["x"],getUrlVars()["y"]);
+	    var convertor = new BMap.Convertor();
+        var pointArr = [];
+        pointArr.push(ggPoint);
+        convertor.translate(pointArr, 1, 5, translateCallback)
+
+　　}
+	function showqj(){
+	　var t=setTimeout("timedMsg()",500);
+	}
+	function getUrlVars(){
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++) {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+</script>
+
+
+

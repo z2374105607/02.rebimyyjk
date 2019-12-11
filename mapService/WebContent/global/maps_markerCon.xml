@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<popupContent>
+    <!-- 普通兴趣点 -->
+    <element type="poi">
+    <titleFiled></titleFiled>
+	<item key="ADDRESS">地址</item>
+	<item key="TEL">电话</item>
+	</element>
+</popupContent>

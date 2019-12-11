@@ -1,0 +1,650 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+ 
+    <title>倾斜模型</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-select.min.js"></script>
+    <script src="./js/slider.js"></script>
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/echarts.min.js"></script>
+    <script type="text/javascript" src="./js/flat-ui.min.js"></script>
+    <script src="./js/tooltip.js"></script>
+    <script src="./js/config.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+
+
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;background-color: #000000;
+        }
+        .map-tip{position:absolute;top:145px;left:720px;height:25px;border:1px #ccc solid;background:#fff;display:none;font-size:12px;line-height:25px;color:#666;padding:0 10px;}
+		.map-tip:before{content:'';display:block;position:absolute;bottom:-6px;left:50%;width:0;padding:0;border-left:6px transparent solid;border-right:6px transparent solid;
+	                                     border-top:6px #fff solid;transform:translateX(-50%);}
+
+    
+        #toolbar{
+            margin: 5px;
+            padding: 2px 5px;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            background: rgba(42, 42, 42, 0.8);
+            padding: 4px;
+            border-radius: 4px;
+            height:360px;
+            width:56px;
+        }
+        .measureCur{
+            cursor: url(./images/cur/measure.cur), auto;
+        }
+
+                label{
+            display: inline-block;
+            margin: 5px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+
+        .dropdown-container{
+            display: block;
+            position: absolute;
+            top: 100%;
+            box-sizing: border-box;
+            left: 0;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            urser-select: none;
+            -webkit-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -webkit-transform 0.2s ease-in;
+            -moz-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -moz-transform 0.2s ease-in;
+            transition: visibility 0s 0.2s, opacity 0.2s ease-in, transform 0.2s
+            ease-in;
+            -webkit-transform: translate(0, -20%);
+            -moz-transform: translate(0, -20%);
+            transfor: translate(0, -20%);
+            opacity: 0;
+            visibility: hidden;
+            border: 1px solid #444;
+            background-color: rgba(38, 38, 38, 0.75);
+            margin: 9px;
+            color: white;
+        }
+        .dropdown-visible{
+            -webkit-transform: translate(0, 0);
+            -moz-transform: translate(0, 0);
+            transform: translate(0, 0);
+            visibility: visible;
+            opacity: 1;
+            -webkit-transition: opacity 0.2s ease-out, -webkit-transform 0.2s
+            ease-out;
+            -moz-transition: opacity 0.2s ease-out, -moz-transform 0.2s ease-out;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+        .items-wraper{
+            display: block;
+            position: relative;
+            top: auto;
+            right: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: 400px;
+            text-align: left;
+            width: 170px;
+        }
+        .item{
+            display: inline-block;
+            vertical-align: top;
+            margin: 5px;
+            width: 140px;
+            text-align: center;
+            cursor: pointer;
+            position : relative;
+        }
+        .item-icon{
+            display: inline-block;
+            position: relative;
+            width: inherit;
+            height: 100px;
+            background-size: 100% 100%;
+            color: #edffff;
+            box-sizing: border-box;
+            border: 3px solid #ffffff;
+        }
+        .drawCur{
+            cursor: url(./images/cur/draw.cur), auto;
+        }
+ 
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+
+      <div id="toolbar">
+          <button type="button" class="cesium-button" onclick="fullMap()" title="全图"><img title="全图" src="../images/full-map.png"></button>
+          <button type="button" class="cesium-button" onclick="flyTo()" title="定位" > <img title="定位" src="../images/map_location.png"></button>
+          <button type="button" class="cesium-button" onclick="activePickupCoordinate()"  title="坐标拾取"><img title="坐标拾取" src="../images/placeholder.png"></button>
+          <button type="button" class="cesium-button" onclick="activeMeasureDistance()" title="测距"> <img title="测距" src="../images/measure-distance.png"></button>
+          <button type="button" class="cesium-button" onclick="activeMeasureArea()" title="测面"> <img title="测面" src="../images/measure-area.png"></button>
+          <button type="button" class="cesium-button" onclick="activeMeasureHeight()" title="测高"> <img title="测高" src="../images/measure-height.png"></button>
+          <button type="button" class="cesium-button" onclick="activeViewshed3D()" title="可视域分析"> <img title="可视域分析" src="../images/viewshed3D.png"></button>
+          <button type="button" class="cesium-button" onclick="activeSkyline()" title="天际线分析"> <img title="天际线分析" src="../images/skyline.png"></button>
+          <button type="button" class="cesium-button" onclick="clearAll()" title="清除"> <img title="清除" src="../images/clear-all.png"></button>
+           <!--<button type="button" class="cesium-button" onclick="showBingMap()">bingMap</button>-->
+      </div>
+    <div id="map" style="position : absolute;right : 1%; bottom : 1%;width:400px;height:200px;"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    var viewer;
+    var clampMode = 0;
+    var handlerDis, handlerArea, handlerHeight;
+    var viewshed3D;
+    var pointHandler
+    var host = document.location.toString().match(/file:\/\//) ? "http://47.92.149.208:8090" : 'http://' + document.location.host;
+    var handler;
+    var skyline;
+    var urlHashtable ={}
+    urlHashtable["huzhou"] = ({ url: "http://47.92.149.208:8090/iserver/services/3D-MSC_qingx/rest/realspace/datas/huzhou/config", x: 120.09637, y: 30.86028, h: 300, p: -0.3 });
+    urlHashtable["tunxi"] = ({ url: "http://47.92.149.208:8090/iserver/services/3D-huangs/rest/realspace/datas/huangshan/config", x: 118.30107, y: 29.710661, h: 300, p: -0.9 });
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null
+    }
+    var code = getQueryString("code");
+    if (!code) { alert("地图编码为空！"); };
+    var config=urlHashtable[code];
+
+    if (!config) { alert("地图配置获取为空！") };
+    function onload(Cesium) {
+
+        //Sandcastle.addToolbarMenu([{
+        //    text: '空间',
+        //    onselect: function () {
+        //        clampMode = 0;
+        //        handlerArea.clampMode = 0;
+        //        handlerDis.clampMode = 0;
+        //    }
+        //},
+        //{
+        //    text: '贴地',
+        //    onselect: function () {
+        //        clampMode = 1;
+        //        handlerArea.clampMode = 1;
+        //        handlerDis.clampMode = 1;
+        //    }
+        //}, {
+        //    text: '贴模型',
+        //    onselect: function () {
+        //        clampMode = 2;
+        //        handlerArea.clampMode = 2;
+        //        handlerDis.clampMode = 2;
+        //    }
+        //}
+        //]);
+
+        
+        //初始化viewer部件
+        viewer = new Cesium.Viewer('cesiumContainer', {
+           // selectionIndicator:true,
+           // terrainProvider: new Cesium.CesiumTerrainProvider({
+           //     url: URL_CONFIG.STK
+           // }),
+           //imageryProvider: new Cesium.BingMapsImageryProvider({
+           //    key: "AjQhMyw76oicHqFz7cUc3qTEy3M2fC2YIbcHjqgyMPuQprNVBr3SsvVdOfmlVc0v",
+           //    url: URL_CONFIG.BINGMAP
+            //})
+            imageryProvider: new Cesium.TiandituImageryProvider({
+                credit: new Cesium.Credit('天地图全球影像服务     数据来源：国家地理信息公共服务平台 & 四川省测绘地理信息局')
+            })
+        });
+        scene = viewer.scene;
+        widget = viewer.cesiumWidget;
+        handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+
+        initViewshed3D();
+        initMeasure();
+        tooltip = createTooltip(document.body);
+        $('#loadingbar').remove();
+        try {
+           
+            //场景添加S3M图层服务
+            var promise = scene.addS3MTilesLayerByScp(config.url, {
+                name : 'map'
+            });
+            Cesium.when(promise, function (layer) {
+                layer.height = 0;
+                //设置相机位置，定位至模型
+                scene.camera.setView({
+                    //将经度、纬度、高度的坐标转换为笛卡尔坐标
+                    destination: Cesium.Cartesian3.fromDegrees(config.x, config.y, config.h),
+                    orientation : {
+                        heading:0,
+                        pitch:config.p,
+                        roll :0.0
+                    }
+                });
+            },function(e){
+                if (widget._showRenderLoopErrors) {
+                    var title = '渲染时发生错误，已停止渲染。';
+                    widget.showErrorPanel(title, undefined, e);
+                }
+            });
+        }
+        catch(e){
+            if (widget._showRenderLoopErrors) {
+                var title = '渲染时发生错误，已停止渲染。';
+                widget.showErrorPanel(title, undefined, e);
+            }
+        }
+    }
+
+    function initMeasure()
+    {
+        //初始化测量距离
+        handlerDis = new Cesium.MeasureHandler(viewer, Cesium.MeasureMode.Distance);
+        //注册测距功能事件
+        handlerDis.measureEvt.addEventListener(function (result) {
+            var distance = result.distance > 1000 ? (result.distance / 1000).toFixed(2) + 'km' : result.distance + 'm';
+            handlerDis.disLabel.text = '距离:' + distance;
+            handlerDis.disLabel.outlineColor = new Cesium.Color(0, 0, 0);
+            handlerDis.disLabel.font = '100 20px sans-serif';
+            handlerDis.disLabel.showBackground = false;
+           // handlerDis.disLabel.outlineWidth = 2;
+            //tooltip.showAt(handlerDis.handler._primaryPosition, '距离:' + distance);
+        });
+
+
+        handlerDis.activeEvt.addEventListener(function (isActive) {
+            if (isActive == true) {
+                viewer.enableCursorStyle = false;
+                viewer._element.style.cursor = '';
+                $('body').removeClass('measureCur').addClass('measureCur');
+            }
+            else {
+                viewer.enableCursorStyle = true;
+                $('body').removeClass('measureCur');
+            }
+        });
+
+        //初始化测量面积
+        handlerArea = new Cesium.MeasureHandler(viewer, Cesium.MeasureMode.Area, 0);
+        handlerArea.measureEvt.addEventListener(function (result) {
+            var area = result.area > 1000000 ? result.area / 1000000 + 'km²' : result.area + '㎡'
+            handlerArea.areaLabel.text = '面积:' + area;
+            handlerArea.areaLabel.outlineColor = new Cesium.Color(0, 0, 0);
+            handlerDis.disLabel.showBackground = false;
+            handlerArea.areaLabel.font = '100 20px sans-serif';
+           // handlerArea.areaLabel.outlineWidth = 2.0;
+            // handlerArea.areaLabel.addClass();
+            //tooltip.showAt(handlerArea.handler._primaryPosition, '面积:' + area);
+        });
+        handlerArea.activeEvt.addEventListener(function (isActive) {
+            if (isActive == true) {
+                viewer.enableCursorStyle = false;
+                viewer._element.style.cursor = '';
+                $('body').removeClass('measureCur').addClass('measureCur');
+            }
+            else {
+                viewer.enableCursorStyle = true;
+                $('body').removeClass('measureCur');
+            }
+        });
+
+        //初始化测量高度
+        handlerHeight = new Cesium.MeasureHandler(viewer, Cesium.MeasureMode.DVH);
+        handlerHeight.measureEvt.addEventListener(function (result) {
+            var distance = result.distance > 1000 ? (result.distance / 1000).toFixed(2) + 'km' : result.distance + 'm';
+            var vHeight = result.verticalHeight > 1000 ? (result.verticalHeight / 1000).toFixed(2) + 'km' : result.verticalHeight + 'm';
+            var hDistance = result.horizontalDistance > 1000 ? (result.horizontalDistance / 1000).toFixed(2) + 'km' : result.horizontalDistance + 'm';
+            handlerHeight.disLabel.text = '空间距离:' + distance;
+            handlerHeight.disLabel.outlineColor = new Cesium.Color(0, 0, 0);
+            handlerHeight.disLabel.font = '100 20px sans-serif';
+            handlerHeight.disLabel.outlineWidth = 5.0;
+            handlerHeight.disLabel.showBackground = false;
+            handlerHeight.vLabel.text = '垂直高度:' + vHeight;
+            handlerHeight.vLabel.outlineColor = new Cesium.Color(0, 0, 0);
+            handlerHeight.vLabel.font = '100 20px sans-serif';
+            handlerHeight.vLabel.outlineWidth = 5.0;
+            handlerHeight.vLabel.showBackground = false;
+            handlerHeight.hLabel.text = '水平距离:' + hDistance;
+            handlerHeight.hLabel.outlineColor = new Cesium.Color(0, 0, 0);
+            handlerHeight.hLabel.font = '100 20px sans-serif';
+            handlerHeight.hLabel.outlineWidth = 5.0;
+            handlerHeight.hLabel.showBackground = false;
+            //tooltip.showAt(handlerHeight.handler._primaryPosition, '面积:' + hDistance);
+        });
+        handlerHeight.activeEvt.addEventListener(function (isActive) {
+            if (isActive == true) {
+                viewer.enableCursorStyle = false;
+                viewer._element.style.cursor = '';
+                $('body').removeClass('measureCur').addClass('measureCur');
+            }
+            else {
+                viewer.enableCursorStyle = true;
+                $('body').removeClass('measureCur');
+            }
+        });
+    }
+
+    function activeSkyline()
+    {
+     
+        //添加S3M图层
+        //var ground1Promise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_JINJIANG, { name: 'ground1' });
+        if (skyline) skyline.destroy();
+
+        skyline = new Cesium.Skyline(scene);//创建天际线分析对象
+        var cartographic = scene.camera.positionCartographic;
+        var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+        var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        var height = cartographic.height;
+
+        //天际线分析的视口位置设置成当前相机位置
+        skyline.viewPosition = [longitude, latitude, height];
+
+        //设置俯仰和方向
+        skyline.pitch = Cesium.Math.toDegrees(scene.camera.pitch);
+        skyline.direction = Cesium.Math.toDegrees(scene.camera.heading);
+        skyline.build();
+
+        setTimeout(function () {
+
+            //获取二维天际线对象
+            var object = skyline.getSkyline2D();
+            //用echarts绘制二维天际线
+            var myChart = echarts.init(document.getElementById("map"));
+
+            var option = {
+                backgroundColor: "rgba(73,139,156,0.9)",
+                title: {
+                    text: "二维天际线"
+                },
+                tooltip: {
+                    trigger: "axis"
+                },
+                calculable: true,
+                xAxis: [
+                    {
+                        type: "category",
+                        boundaryGap: false,
+                        data: object.x,
+                        show: false
+                    }
+                ],
+                yAxis: [
+                      {
+                          type: "value",
+                          min: 0,
+                          max: 1
+                      }
+                ],
+                series: [
+                    {
+                        name: "",
+                        type: "line",
+                        data: object.y
+                    }
+                ]
+            }
+            myChart.setOption(option);
+
+            $("#map").show();
+        }, 2000)
+    }
+
+    function activeMeasureDistance()
+    {
+        deactiveAll();
+        handlerDis && handlerDis.activate();
+    }
+
+    function activeMeasureArea()
+    {
+        deactiveAll();
+        handlerArea && handlerArea.activate();
+    }
+
+    function activeMeasureHeight()
+    {
+        deactiveAll();
+        handlerHeight && handlerHeight.activate();
+    }
+    
+    function clearAll() {
+        handlerDis && handlerDis.clear();
+        handlerArea && handlerArea.clear();
+        handlerHeight && handlerHeight.clear();
+        viewer.entities.removeAll();
+        //设置鼠标左键单击回调事件
+        handler.setInputAction(function (e) {
+            viewer.entities.removeAll();
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        if (skyline)
+        {
+            skyline.destroy();
+            skyline = null;
+        }
+        $("#map").hide();
+        tooltip.setVisible(false);
+        clearViewshed3D();
+
+    }
+    function deactiveAll() {
+        handlerDis && handlerDis.deactivate();
+        handlerArea && handlerArea.deactivate();
+        handlerHeight && handlerHeight.deactivate();
+        viewer.entities.removeAll();
+        //设置鼠标左键单击回调事件
+        handler.setInputAction(function (e) {
+            viewer.entities.removeAll();
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    }
+
+    function activePickupCoordinate()
+    {
+        //设置鼠标左键单击回调事件
+        handler.setInputAction(function (e) {
+            //首先移除之前添加的点
+            viewer.entities.removeAll();
+            //获取点击位置笛卡尔坐标
+            var position = scene.pickPosition(e.position);
+
+            //将笛卡尔坐标转化为经纬度坐标
+            var cartographic = Cesium.Cartographic.fromCartesian(position);
+            var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+            var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+            var height = cartographic.height;
+            if (height < 0) {
+                height = 0;
+            }
+
+            //创建弹出框信息
+            var entity = new Cesium.Entity({
+                name: "位置信息",
+                description: createDescription(Cesium, [longitude, latitude, height+12])
+            });
+            viewer.selectedEntity = entity;
+
+            var base64ImageUrl = "data:image/png;base64,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ICAgIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiCiAgICAgICAgICAgIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIKICAgICAgICAgICAgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iPgogICAgICAgICA8eG1wOkNyZWF0b3JUb29sPkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE3IChNYWNpbnRvc2gpPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx4bXA6Q3JlYXRlRGF0ZT4yMDE3LTA4LTA4VDE0OjQ4OjA0KzA4OjAwPC94bXA6Q3JlYXRlRGF0ZT4KICAgICAgICAgPHhtcDpNZXRhZGF0YURhdGU+MjAxNy0wOC0wOFQxNDo0ODowNCswODowMDwveG1wOk1ldGFkYXRhRGF0ZT4KICAgICAgICAgPHhtcDpNb2RpZnlEYXRlPjIwMTctMDgtMDhUMTQ6NDg6MDQrMDg6MDA8L3htcDpNb2RpZnlEYXRlPgogICAgICAgICA8eG1wTU06SW5zdGFuY2VJRD54bXAuaWlkOjhlZDQ4YzdkLWVhODMtNGU2Yy04ZjkzLWU1MjVhMzkyYjRmNjwveG1wTU06SW5zdGFuY2VJRD4KICAgICAgICAgPHhtcE1NOkRvY3VtZW50SUQ+YWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOmRlMzdhM2UwLWJjODgtMTE3YS1iMGUyLTg0ZWZiMjMyMDg0MjwveG1wTU06RG9jdW1lbnRJRD4KICAgICAgICAgPHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD54bXAuZGlkOjVkZDNhOGM4LTE4NjEtNDgwNC1hZmNiLTcwMmYyNGI2Nzg3ZTwveG1wTU06T3JpZ2luYWxEb2N1bWVudElEPgogICAgICAgICA8eG1wTU06SGlzdG9yeT4KICAgICAgICAgICAgPHJkZjpTZXE+CiAgICAgICAgICAgICAgIDxyZGY6bGkgcmRmOnBhcnNlVHlwZT0iUmVzb3VyY2UiPgogICAgICAgICAgICAgICAgICA8c3RFdnQ6YWN0aW9uPmNyZWF0ZWQ8L3N0RXZ0OmFjdGlvbj4KICAgICAgICAgICAgICAgICAgPHN0RXZ0Omluc3RhbmNlSUQ+eG1wLmlpZDo1ZGQzYThjOC0xODYxLTQ4MDQtYWZjYi03MDJmMjRiNjc4N2U8L3N0RXZ0Omluc3RhbmNlSUQ+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDp3aGVuPjIwMTctMDgtMDhUMTQ6NDg6MDQrMDg6MDA8L3N0RXZ0OndoZW4+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpzb2Z0d2FyZUFnZW50PkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE3IChNYWNpbnRvc2gpPC9zdEV2dDpzb2Z0d2FyZUFnZW50PgogICAgICAgICAgICAgICA8L3JkZjpsaT4KICAgICAgICAgICAgICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSJSZXNvdXJjZSI+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDphY3Rpb24+c2F2ZWQ8L3N0RXZ0OmFjdGlvbj4KICAgICAgICAgICAgICAgICAgPHN0RXZ0Omluc3RhbmNlSUQ+eG1wLmlpZDo4ZWQ0OGM3ZC1lYTgzLTRlNmMtOGY5My1lNTI1YTM5MmI0ZjY8L3N0RXZ0Omluc3RhbmNlSUQ+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDp3aGVuPjIwMTctMDgtMDhUMTQ6NDg6MDQrMDg6MDA8L3N0RXZ0OndoZW4+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpzb2Z0d2FyZUFnZW50PkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE3IChNYWNpbnRvc2gpPC9zdEV2dDpzb2Z0d2FyZUFnZW50PgogICAgICAgICAgICAgICAgICA8c3RFdnQ6Y2hhbmdlZD4vPC9zdEV2dDpjaGFuZ2VkPgogICAgICAgICAgICAgICA8L3JkZjpsaT4KICAgICAgICAgICAgPC9yZGY6U2VxPgogICAgICAgICA8L3htcE1NOkhpc3Rvcnk+CiAgICAgICAgIDxkYzpmb3JtYXQ+aW1hZ2UvcG5nPC9kYzpmb3JtYXQ+CiAgICAgICAgIDxwaG90b3Nob3A6Q29sb3JNb2RlPjM8L3Bob3Rvc2hvcDpDb2xvck1vZGU+CiAgICAgICAgIDxwaG90b3Nob3A6SUNDUHJvZmlsZT5EaXNwbGF5PC9waG90b3Nob3A6SUNDUHJvZmlsZT4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzIwMDAwLzEwMDAwPC90aWZmOlhSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj43MjAwMDAvMTAwMDA8L3RpZmY6WVJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U+NjU1MzU8L2V4aWY6Q29sb3JTcGFjZT4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjI2PC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxZRGltZW5zaW9uPjI2PC9leGlmOlBpeGVsWURpbWVuc2lvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgCjw/eHBhY2tldCBlbmQ9InciPz6+Ino/AAAAIGNIUk0AAG11AABzoAAA/N0AAINkAABw6AAA7GgAADA+AAAQkOTsmeoAAAM9SURBVHjavJZfaFtVHMc/556bNGb2r0vVZohDXEV80GUIDcoKBdmbvumTD3vxZfg0QYQNZCIKPkyGPslefFAmc0970qnVsiDSSBnBMWptNE2bNEnTJjc3uX/O8WF30HZJb9Oh9+lczo/z+f2+vz/nCK01/8dn7rWZSaZMYAR4VKEnPa1jtlZtS6tcBFFJyEj1nm26mO15jta6NyiTTE0Cp4FXB6SejEiNADSSji9xffErcBX4CiiEKSN2GwRRvA58nHhYJ4cmxoiNPwKxGKpcRtdqaNum7QkajkHNNn4D3plamZ/tF/Q28MnRY2ORwZmT6GoVb2EBVal0PaDhGBQbsgy8MbUy/+O+QJlk6hTw9dPPJ4fjr8zg3riBt7yMCEl0APsTODW1Mr/YzcbYBhkHzh5JmMPxmWmc69fx9wEBGIwqxg/5TwFnMslUdE8QcByYHn7hWdy5OdTaWl/lOzKgAN4CDoeBTibivhRS4i8u9t0nQsDQgIoB02Gg5wYORfELhQM3ZczUACfCQEqYkb4l29mYAPhhIFTTAqX+kxG0HWQKHmzuibslGgkDZdu+eCCQ7QqAm2Ggn23XODBEaWg4Rh2YCwPlLFfMWu7BotrsGABXgGoYqAh8WtgyW6rPVNmeoGTJ1bLvfpYuZpUQQgohDCEEIkjcbq2uAV9stPcvoQbym6aXc6xLr5VuOcATwGPAEBCFu1Os2330UaUl04bgxGgsvNSrLUnB6/xwbuOvHPBkwPYACygBq0BX11eBN8uWXG+F5KveNliy1J0P6/kvS76jg9KOAnFgDJgI1vTS6A+FPvPPlqk81buU/26K6uXG2ucLTnOzh6qdILqeIF4q/v5tyXcu1mx5356vYHlLtn9q1y9/Y5WXegBqQD6QkL2yri/U85fuWP73NXunWdWW5JzWtfc3ln/ZdrgPtIE6sATkApgf9gpS2U5j7Tu7dj5uHD4ihPHMaEyx3pLcarqz720sXQVUII0DbAbJrwf/XuDAzqs8k0zdR0oXswKIfDB69MWXYyNXEg/px/Mtdfv0+u13V32nCdjAOlAJ1m636a213hu0DWgCgzcnjtfSxexU4H0l0N/d7X030L8DAHwSfzviYNa3AAAAAElFTkSuQmCC";
+            //在点击位置添加对应点
+            viewer.entities.add(new Cesium.Entity({
+                 title: "位置信息",
+                billboard: {
+                    image: base64ImageUrl, // default: undefined
+                    show: true
+                },
+                position: Cesium.Cartesian3.fromDegrees(longitude, latitude, height + 5)
+            }));
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+
+        //创建描述位置的对话框
+        function createDescription(Cesium, properties) {
+            var simpleStyleIdentifiers = ['经度', '纬度', '高度'];
+            var html = '';
+            for (var key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    if (simpleStyleIdentifiers.indexOf(key) !== -1) {
+                        continue;
+                    }
+                    var value = properties[key];
+                    if (Cesium.defined(value) && value !== '') {
+                        html += '<tr><td>' + simpleStyleIdentifiers[key] + '</td><td>' + value + '</td></tr>';
+                    }
+                }
+            }
+            if (html.length > 0) {
+                html = '<table class="zebra"><tbody>' + html + '</tbody></table>';
+            }
+            return html;
+        }
+    }
+
+    function fullMap()
+    {
+        var imageryLayers = viewer.imageryLayers;
+        viewer.flyTo(imageryLayers.get(0));
+    }
+
+    function flyTo() {
+        // 4. 飞向利用方位角(heading)、俯仰角(pitch)、滚动角(roll)表示方向(orientatin)的位置
+        viewer.camera.flyTo({
+            //将经度、纬度、高度的坐标转换为笛卡尔坐标
+            destination: Cesium.Cartesian3.fromDegrees(120.09637, 30.86028, 300),
+            orientation: {
+                heading: 0,
+                pitch: -0.3,
+                roll: 0.0
+            }
+        });
+    }
+
+
+
+    function showBingMap()
+    {
+        //使用BingMap影像服务初始化viewer部件
+        var imageryProvider = new Cesium.BingMapsImageryProvider({
+            url: URL_CONFIG.BINGMAP,
+            key : "AjQhMyw76oicHqFz7cUc3qTEy3M2fC2YIbcHjqgyMPuQprNVBr3SsvVdOfmlVc0v"
+        }); 
+
+        var imageryLayerCollection = viewer.scene.globe._imageryLayerCollection;
+        var layer = imageryLayerCollection.get(0);
+        imageryLayerCollection.remove(layer, true);
+        imageryLayerCollection.addImageryProvider(imageryProvider, 0);
+    }
+     
+    function activeViewshed3D() {
+  
+        handler.setInputAction(function (e) {
+            //鼠标右键事件回调，不再执行鼠标移动事件中对可视域的操作
+            scene.viewFlag = true;
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+        //鼠标移动时间回调
+        handler.setInputAction(function (e) {
+            //若此标记为false，则激活对可视域分析对象的操作
+            if (!scene.viewFlag) {
+                //获取鼠标屏幕坐标,并将其转化成笛卡尔坐标
+                var position = e.endPosition;
+                var last = scene.pickPosition(position);
+
+                //计算该点与视口位置点坐标的距离
+                var distance = Cesium.Cartesian3.distance(viewPosition, last);
+
+                if (distance > 0) {
+                    //将鼠标当前点坐标转化成经纬度
+                    var cartographic = Cesium.Cartographic.fromCartesian(last);
+                    var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+                    var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+                    var height = cartographic.height;
+
+                    //通过该点设置可视域分析对象的距离及方向
+                    viewshed3D.setDistDirByPoint([longitude, latitude, height]);
+                }
+            }
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+        if (pointHandler.active) {
+            return;
+        }
+        clearViewshed3D();
+        //激活绘制点类
+        pointHandler.activate();
+ 
+    }
+
+    function clearViewshed3D()
+    {
+        //先清除之前的可视域分析
+        viewer.entities.removeAll();
+        viewshed3D.distance = 0.1;
+        scene.viewFlag = true;
+        pointHandler.deactivate();
+    }
+
+    //可视域分析
+    function initViewshed3D()
+    {
+        //先将此标记置为true，不激活鼠标移动事件中对可视域分析对象的操作
+        scene.viewFlag = true;
+        //创建可视域分析对象
+        viewshed3D = new Cesium.ViewShed3D(scene);
+        pointHandler = new Cesium.PointHandler(viewer);
+        pointHandler.drawCompletedEvent.addEventListener(function (point) {
+            var position = point.position._value;
+            viewPosition = position;
+
+            //将获取的点的位置转化成经纬度
+            var cartographic = Cesium.Cartographic.fromCartesian(position);
+            var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+            var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+            var height = cartographic.height;
+
+            if (scene.viewFlag) {
+                //设置视口位置
+                viewshed3D.viewPosition = [longitude, latitude, height];
+                viewshed3D.build();
+                //将标记置为false以激活鼠标移动回调里面的设置可视域操作
+                scene.viewFlag = false;
+            }
+        });
+      
+    }
+    </script>
+</body>
+</html>

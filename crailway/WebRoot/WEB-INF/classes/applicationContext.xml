@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd  
+                           http://www.springframework.org/schema/tx   
+                           http://www.springframework.org/schema/tx/spring-tx-3.1.xsd  
+                           http://www.springframework.org/schema/aop   
+                           http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+                           http://www.springframework.org/schema/context   
+                           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	<!-- 开启注解注入 -->
+	<context:annotation-config />
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<!-- 引入配置文件 -->
+		<!-- 引入属性文件 -->
+<!-- 	<bean class="hibernate.PropertiesUtil">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+		<property name="decryptProperties">
+			<array>
+				需要解密的配置
+				<value>jdbc.password</value>
+			</array>
+		</property>
+	</bean> -->
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 数据源 -->
+	<bean id="dataSource" destroy-method="close"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 池启动时创建的连接数量 -->
+		<property name="initialSize" value="10" />
+		<!-- 同一时间可以从池分配的最多连接数量。设置为0时表示无限制。 -->
+		<property name="maxActive" value="50" />
+		<!-- 池里不会被释放的最多空闲连接数量。设置为0时表示无限制。 -->
+		<property name="maxIdle" value="20" />
+		<!-- 在不新建连接的条件下，池中保持空闲的最少连接数。 -->
+		<property name="minIdle" value="10" />
+		<!-- 设置自动回收超时连接 -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 自动回收超时时间(以秒数为单位) -->
+		<property name="removeAbandonedTimeout" value="720" />
+		<!-- 设置在自动回收超时连接的时候打印连接的超时错误 -->
+		<property name="logAbandoned" value="true" />
+		<!-- 等待超时以毫秒为单位，在抛出异常之前，池等待连接被回收的最长时间（当没有可用连接时）。设置为-1表示无限等待。 -->
+		<property name="maxWait" value="100" />
+		<!-- 启动connection校验定时器,定时器运行时间间隔就是timeBetweenEvictionRunsMillis的值.默认为-1,表示不启动定时器,这里设定为1小时,只要小于mysql的wait_timeout就可以了 -->
+		<property name="timeBetweenEvictionRunsMillis">
+			<value>3600000</value><!--1 hours -->
+		</property>
+		<!-- 表示检查idle的connection,false为不检查 -->
+		<property name="testWhileIdle">
+			<value>true</value>
+		</property>
+		<!-- 用于检查connection的sql语句 -->
+		<property name="validationQuery">
+			<value>select 1 from dual</value>
+		</property>
+	</bean>
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.webul.bean</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+				<prop key="hibernate.jdbc.batch_size">${hibernate.jdbc.batch_size}</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	 <bean id="timerTask" class="com.webul.timer.UpdateTimer" init-method="init"></bean> 
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- hibernate transaction for read and wirte -->
+			<tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="remove*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="edit*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="false" rollback-for="java.lang.Exception" />
+			<!-- hibernate transaction for read only -->
+			<tx:method name="validate*" propagation="REQUIRED"
+				isolation="DEFAULT" timeout="-1" read-only="true" />
+			<tx:method name="get*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+			<tx:method name="find*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+			<tx:method name="load*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+			<tx:method name="query*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+			<tx:method name="page*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+			<!--default -->
+			<tx:method name="*" propagation="REQUIRED" isolation="DEFAULT"
+				timeout="-1" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+</beans>  

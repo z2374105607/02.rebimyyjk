@@ -1,0 +1,1 @@
+var _startLonlat,_endLonlat,_approach;//起始点/终点/途径点

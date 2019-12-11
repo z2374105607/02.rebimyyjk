@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<maps>
+<!--地图1,常规的地图配置-->
+ <map name="电子地图" icon="vecmap" >
+  <!-- 默认级别 -->
+  <initLevel>15</initLevel>
+  <!-- 中心点 -->
+  <centerPoint>116.84292,38.3079</centerPoint>
+  <!-- 级别范围 -->
+  <leverScope>9-20</leverScope>
+  <!-- 最大范围 -->
+  <!--  
+  <maxExtent>113.659 36.140 114.7885 36.711</maxExtent>
+  -->
+  <!-- 最小范围 -->
+  <!-- 
+  <minExtent>113.659 36.140 114.7885 36.711</minExtent>
+   -->
+  <!-- 测量服务地址，优先级1 -->
+  <measureURL>http://www.mapcx.gov.cn/services/iserver/Tile-1220/rest/maps/ShiLiangTu</measureURL>
+  <layers>
+   <layer type="wmts" isBaseLayer="true" name="天地图-矢量底图" endLeave="18"  targer="1">
+    <url>http://t0.tianditu.com/vec_c/wmts</url>
+   </layer>
+    <layer type="wmts" isBaseLayer="true" name="天地图-矢量标注" endLeave="18"  targer="1">
+    <url>http://t0.tianditu.com/cva_c/wmts</url>
+   </layer>
+  </layers>
+ </map>
+ <!--地图2,常规的地图配置-->
+ <map name="影像地图" icon="imagemap" >
+  <initLevel>15</initLevel>
+  <centerPoint>116.84292,38.3079</centerPoint>
+  <leverScope>9-20</leverScope>
+  <!-- 可选参数，获取优先级，选从wmts服务xml中获取，没有则从当前文件找，再没有会从global.xml文件中找，若还没有则从wmts服务文件中计算出来(目前计算有误差，建议在前两项任意位置配置一项) -->
+  <resolutions>
+	0.7031249999999999936115128777990292,0.3515624999999999968057564388995146,
+	0.1757812499999999984028782194497573,0.08789062500000014886216906166869328,
+	0.04394531250000007443108453083434663,0.02197265625000000728339627502841039,
+	0.01098632812500001860777113270858666,0.005493164062500009303885566354293329,
+	0.002746582031250001658728184138270372,0.001373291015625000829364092069135186,
+	0.0006866455078124989180747465151294470,0.0003433227539062494590373732575647235,
+	0.0001716613769531250288401465326699910,0.00008583068847656251442007326633499548,
+	0.00004291534423828140687076658511131235,0.00002145767211914064357109131177813033,
+	0.00001072883605957030681947266069468370,0.000005364418029785168375809325541723313,
+	0.000002682209014892578201475464693109072,0.000001341104507446289100737732346554536
+ </resolutions>
+  <!-- 最大范围 ,可选-->
+  <maxExtent>113.659 36.140 114.7885 36.711</maxExtent>
+  <!-- 最小范围 -->
+  <minExtent>113.659 36.140 114.7885 36.711</minExtent>
+  <measureURL>http://www.mapcx.gov.cn/services/iserver/Tile-1220/rest/maps/ShiLiangTu</measureURL>
+  <layers>
+  <layer type="wmts" isBaseLayer="true" name="天地图-影像底图" endLeave="18"  targer="2">
+   <url>http://t0.tianditu.com/img_c/wmts</url>
+  </layer>
+   <layer type="wmts" isBaseLayer="true" name="天地图-影像标注" endLeave="18"  targer="2">
+   <url>http://t0.tianditu.com/cia_c/wmts</url>
+  </layer>
+ </layers>
+ </map>
+</maps>

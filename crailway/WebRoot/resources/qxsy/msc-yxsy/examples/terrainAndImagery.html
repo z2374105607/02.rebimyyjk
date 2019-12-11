@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>地形影像</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+    <script src="./js/config.js"></script>
+
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;background-color: #000000;
+        }
+        b{
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<div id="toolbar" style="position: absolute;left: 10px;top:10px;display: none;">
+    <div class="squaredTwo" id="selType">
+        <input type="checkbox">
+        <label class="check-icon"></label>
+    </div>
+    <b>有效地形区域</b>
+</div>
+<script>
+function onload(Cesium) {
+    var viewer = new Cesium.Viewer('cesiumContainer',{
+    //创建地形服务提供者的实例，url为SuperMap iServer发布的TIN地形服务
+        terrainProvider : new Cesium.CesiumTerrainProvider({
+            url : URL_CONFIG.ZF_TERRAIN,
+            isSct : true//地形服务源自SuperMap iServer发布时需设置isSct为true
+        })
+    });
+    //添加SuperMap iServer发布的影像服务
+    var layer = viewer.imageryLayers.addImageryProvider(new Cesium.SuperMapImageryProvider({
+        url : URL_CONFIG.ZF_IMG
+    }));
+
+    function setView(){
+        viewer.scene.camera.setView({
+            destination : Cesium.Cartesian3.fromDegrees(87.30131367034899, 27.559700673610365, 16071.8147941154),
+            orientation : {
+                heading : 5.7505222965251725,
+                pitch : -0.3009822484658955,
+                roll :6.283185301658538
+            }
+        });
+    }
+    setView();
+
+
+    $('#selType').click(function(evt){
+        var chk = $(evt.target).prev();
+        if(chk && chk[0]){
+            chk[0].checked = !chk[0].checked;
+            var isChecked = chk[0].checked;
+            if(isChecked){
+                viewer = viewer.destroy();
+                viewer = new Cesium.Viewer('cesiumContainer',{
+                    terrainProvider : new Cesium.CesiumTerrainProvider({
+                        url : URL_CONFIG.ZF_TERRAIN,
+                        isSct : true,
+                        isShowGlobe : false//仅显示有TIN地形的有效区域，不显示区域外的地球
+                    })
+                });
+                var layer = viewer.imageryLayers.addImageryProvider(new Cesium.SuperMapImageryProvider({
+                    url : URL_CONFIG.ZF_IMG
+                }));
+            }
+            else{
+                viewer = viewer && viewer.destroy();
+                viewer = new Cesium.Viewer('cesiumContainer',{
+                    //创建地形服务提供者的实例，url为iServer发布的TIN地形服务
+                    terrainProvider : new Cesium.CesiumTerrainProvider({
+                        url : URL_CONFIG.ZF_TERRAIN,
+                        isSct : true//服务源自iServer发布时需要设置isSct为true
+                    })
+                });
+                //添加影像服务
+                var layer = viewer.imageryLayers.addImageryProvider(new Cesium.SuperMapImageryProvider({
+                    url : URL_CONFIG.ZF_IMG
+                }));
+            }
+            setView();
+        }
+    });
+    $('#loadingbar').remove();
+    $('#toolbar').show();
+    
+}
+</script>
+</body>
+</html>

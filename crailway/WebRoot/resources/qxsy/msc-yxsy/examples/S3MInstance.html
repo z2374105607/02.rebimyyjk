@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>S3M Symbol</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="./js/Sandcastle-header.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+    <script src="./js/config.js"></script>
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+        }
+        #toolbar{
+            margin: 5px;
+            padding: 2px 5px;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
+        .dropdown-container{
+            display: block;
+            position: absolute;
+            top: 100%;
+            box-sizing: border-box;
+            left: 0;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            urser-select: none;
+            -webkit-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -webkit-transform 0.2s ease-in;
+            -moz-transition: visibility 0s 0.2s, opacity 0.2s ease-in,
+            -moz-transform 0.2s ease-in;
+            transition: visibility 0s 0.2s, opacity 0.2s ease-in, transform 0.2s
+            ease-in;
+            -webkit-transform: translate(0, -20%);
+            -moz-transform: translate(0, -20%);
+            transfor: translate(0, -20%);
+            opacity: 0;
+            visibility: hidden;
+            border: 1px solid #444;
+            background-color: rgba(38, 38, 38, 0.75);
+            margin: 9px;
+            color: white;
+        }
+        .dropdown-visible{
+            -webkit-transform: translate(0, 0);
+            -moz-transform: translate(0, 0);
+            transform: translate(0, 0);
+            visibility: visible;
+            opacity: 1;
+            -webkit-transition: opacity 0.2s ease-out, -webkit-transform 0.2s
+            ease-out;
+            -moz-transition: opacity 0.2s ease-out, -moz-transform 0.2s ease-out;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+        .items-wraper{
+            display: block;
+            position: relative;
+            top: auto;
+            right: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: 360px;
+            text-align: left;
+        }
+        .item{
+            display: inline-block;
+            vertical-align: top;
+            margin: 5px;
+            width: 155px;
+            text-align: center;
+            cursor: pointer;
+            position : relative;
+        }
+        .item-icon{
+            display: inline-block;
+            position: relative;
+            width: inherit;
+            height: 100px;
+            background-size: 100% 100%;
+            color: #edffff;
+            box-sizing: border-box;
+            border: 3px solid #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<div id="toolbar">
+    <div id="dropdown" class="dropdown-container">
+        <div id="items-group">
+            <div class="items-wraper">
+                <div id="symbol1" class="item">
+                    <div class="item-icon">
+                        <img style="width: 100%;height: 100%;" src="./images/symbol/chuntianshu.png">
+                    </div>
+                </div>
+                <div id="symbol2" class="item">
+                    <div class="item-icon">
+                        <img style="width: 100%;height: 100%;" src="./images/symbol/qiutianshu.png">
+                    </div>
+                </div>
+                <div id="symbol3" class="item">
+                    <div class="item-icon">
+                        <img style="width: 100%;height: 100%;" src="./images/symbol/dongtianshu.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function onload(Cesium) {
+        Sandcastle.addToolbarButton('选择', function() {
+            var $el = $('#dropdown');
+            if($el.hasClass('dropdown-visible')){
+                $('#dropdown').removeClass('dropdown-visible');
+            }
+            else{
+                $('#dropdown').removeClass('dropdown-visible').addClass('dropdown-visible');
+            }
+        });
+        var viewer = new Cesium.Viewer('cesiumContainer',{
+            //imageryProvider : new Cesium.TiandituImageryProvider()
+            imageryProvider : new Cesium.BingMapsImageryProvider({
+                key : "AjQhMyw76oicHqFz7cUc3qTEy3M2fC2YIbcHjqgyMPuQprNVBr3SsvVdOfmlVc0v",//可至官网（https://www.bingmapsportal.com/）申请key
+                url : URL_CONFIG.BINGMAP
+            })
+        });
+        var scene = viewer.scene;
+
+        var s3mLayer = scene.addInstanceS3MLayer();
+
+        Cesium.loadJson('./SampleData/treePoints.json').then(function(result){
+            var features = result.features;
+            var positions = [];
+            var x, y, z;
+            for(var i = 0,j = features.length;i < j;i++){
+                x = parseFloat(features[i].fieldValues[0]);
+                y = parseFloat(features[i].fieldValues[1]);
+                z = parseFloat(features[i].fieldValues[2]);
+                positions.push({
+                    position : Cesium.Cartesian3.fromDegrees(x,y)
+                });
+            }
+            $('#symbol1').click(function(){
+                s3mLayer.switchInstanceModel('./SampleData/tree/chuntianshu.s3m');
+                $('#dropdown').removeClass('dropdown-visible')
+            });
+            $('#symbol2').click(function(){
+                s3mLayer.switchInstanceModel('./SampleData/tree/qiutianshu.s3m');
+                $('#dropdown').removeClass('dropdown-visible')
+            });
+            $('#symbol3').click(function(){
+                s3mLayer.switchInstanceModel('./SampleData/tree/dongtianshu.s3m');
+                $('#dropdown').removeClass('dropdown-visible')
+            });
+            s3mLayer.addS3MInstances('./SampleData/tree/chuntianshu.s3m',positions);
+        });
+
+        scene.camera.setView({
+            destination :  new Cesium.Cartesian3(-1782473.066042744,4482121.031849714,4173049.528081591),
+            orientation : {
+                heading :1.7420272883626406,
+                pitch : -0.2014675958170966,
+                roll : 0.00030231616660003624
+            }
+        });
+    }
+</script>
+</body>
+</html>

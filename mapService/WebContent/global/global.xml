@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- 该配置下除file节点外的其他节点会转化成以节点名命名的全局变量，file节点指定的文件内与该文件存在同级同名的节点时，优先级小的会覆盖优先级大的值 -->
+<resource>
+    <!-- 布局配置xml -->
+	<!-- 地图配置xml -->
+	<!-- node和指向的文件中所要获取的节点名称必须一致，例如 node ="map" path="global/maps.xml 即获取maps.xml 所有更目录下一级map节点的内容 -->
+	<file node="map" path="global/map_china_mk.xml"/>
+	<file node="element" path="global/maps_markerCon.xml"/>
+	<!-- 业务数据配置xml -->
+	 <!-- 初始地图 在地图列表的序号，优先级2（可选，默认值1）-->
+	<mapIndex>1</mapIndex>
+	<!-- 初始化地图是否启用代理,防止跨域设置信息 -->
+	<mapProxy>false</mapProxy>
+	<!-- 测量服务地址-->
+	<measureURL>http://10.22.2.54:8090/iserver/services/map-China100/rest/maps/China</measureURL>
+	<!--	<measureURL>http://10.22.2.54:8090/iserver/services/map-china400/rest/maps/China</measureURL>-->
+	<!-- 地名地址服务地址  用于地址智能匹配-->
+	<addressMatchURL>http://www.tianditucangzhou.com/dfc/services/geocoding/matching/fuzzy</addressMatchURL>
+	<!-- 地名地址模糊查询  地址智能匹配 （输入提示框）-->
+	<addressURL>http://www.tianditucangzhou.com/dfc/services/geocoding/manager/stdic</addressURL>
+	<!-- 匹配类型 -->
+	<matchType>800</matchType>
+	<!-- 提示信息分割字符 -->
+	<splitChara>--</splitChara>
+	<!-- 是否提示地址 -->
+	<addressHint>true</addressHint>
+	<!-- 地名地址逆向  右击菜单地址匹配-->
+	<addresSreverseMatchingURL>http://www.tianditucangzhou.com/dfc/services/geocoding/matching/reverse</addresSreverseMatchingURL>
+	<!-- 路径分析服务地址-->
+	<analysisPathURL>http://www.tianditucangzhou.com:8081/geoesb/proxy/f8ae51c4e8b94c578faed8d8c57bb3dc/{0}/findpath.xml</analysisPathURL>
+	<!-- 兴趣点查询服务地址 注意要和地名地址数据完全对应，否则会出现查找不出的兴趣点-->
+	<poiURL>http://www.tianditucangzhou.com:8081/geoesb/proxy/8d3abedc8658400188c2e1daec1ccba0/</poiURL>
+	<!-- 学区查询 -->
+	<schoolDistrictURL>http://www.tianditucangzhou.com:8081/geoesb/proxy/276f3e0797d44f86b8347b210e1fb903/</schoolDistrictURL>
+	<!--地图兴趣点查询字段(气泡标题字段)-->
+	<poiURLFilter>NAME</poiURLFilter><!--{key}  -->
+	<!--地图兴趣点查询类型字段-->
+	<!-- <poiURLClassFilter>部位属性</poiURLClassFilter> -->
+	<!-- 公用分辨率数组 -->
+	<resolutions>
+	    1.40625,
+		0.7031249999999999936115128777990292,0.3515624999999999968057564388995146,
+		0.1757812499999999984028782194497573,0.08789062500000014886216906166869328,
+		0.04394531250000007443108453083434663,0.02197265625000000728339627502841039,
+		0.01098632812500001860777113270858666,0.005493164062500009303885566354293329,
+		0.002746582031250001658728184138270372,0.001373291015625000829364092069135186,
+		0.0006866455078124989180747465151294470,0.0003433227539062494590373732575647235,
+		0.0001716613769531250288401465326699910,0.00008583068847656251442007326633499548,
+		0.00004291534423828140687076658511131235,0.00002145767211914064357109131177813033,
+		0.00001072883605957030681947266069468370,0.000005364418029785168375809325541723313,
+		0.000002682209014892578201475464693109072,0.000001341104507446289100737732346554536
+    </resolutions>
+    <matrixIdStart>0</matrixIdStart>
+</resource>

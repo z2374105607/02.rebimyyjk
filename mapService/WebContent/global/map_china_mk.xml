@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<maps>
+<!--地图1,常规的地图配置-->
+ <map name="电子地图" icon="vecmap" >
+  <!-- 默认级别 -->
+  <initLevel>4</initLevel>
+  <!-- 中心点 -->
+  <centerPoint>12110071.2651979998,4256013.7349961000</centerPoint>
+  <!-- 级别范围 -->
+  <!-- <leverScope>9-20</leverScope> -->
+  <!-- 测量服务地址，优先级1 -->
+  <measureURL>http://www.mapcx.gov.cn/services/iserver/Tile-1220/rest/maps/ShiLiangTu</measureURL>
+  <layers>
+  <layer type="rest" name="中国地图" isBaseLayer="true">
+  
+ <url>http://192.168.3.111:8090/iserver/services/map-china400/rest/maps/China</url>  
+            
+  </layer> 
+
+  </layers>
+ </map>
+ <!--地图2,常规的地图配置-->
+ <!-- http://t1.tianditu.com/img_w/wmts -->
+
+</maps>

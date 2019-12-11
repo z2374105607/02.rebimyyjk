@@ -1,0 +1,421 @@
+html,body{
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	width:100%;
+	height:100%;
+	position:relative;
+	margin:0;
+	padding:0;
+}
+.head,.centent,.floot,.navigation {
+	width: 100%;
+	font-size: 130%;
+	paddiing: 0px;
+	overflow: hidden;
+	border-top: 1px solid #666;
+	border-bottom: 1px solid #666;
+	background:url() #f0f0f0;
+	clear: both
+}
+.head,.centent,.navigation {
+	_width: 500px;
+	min-width: 500px;
+}
+.head{
+	background:url(../images/heads/tit_bg.jpg) blue repeat-x;
+}
+.head img{width:50%}
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+.border{
+	border:1px solid #ccc;
+}
+.borderBottomRight{
+	border-bottom:1px solid #ccc;
+	border-right:1px solid #ccc;
+}
+.borderTopLeft{
+	border-top:1px solid #ccc;
+	border-left:1px solid #ccc;
+}
+.borderTopRight{
+	border-top:1px solid #ccc;
+	border-right:1px solid #ccc;
+}
+.borderRight{
+	border-right:1px solid #ccc;
+}
+.radian{
+	border-radius: 5px;
+}
+.radianTop{
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+.radianLeft{
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+.radianTopLeft{
+	border-top-left-radius: 5px;
+}
+.radianTopRight{
+	border-top-right-radius: 5px;
+}
+.radianBottomLeft{
+	border-bottom-left-radius: 5px;
+}
+.radianBottomRight{
+	border-bottom-right-radius: 5px;
+}
+.radianRight{
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+.radianBottom{
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+.absolute{
+	position:absolute;
+}
+.head {
+	height: 82px;
+}
+
+.navigation {
+	height: 26px;
+	position: absolute;
+	z-index:90;
+	top: 80px;
+	display:none;
+	background: url(../images/heads/menu_bg.png) repeat;
+}
+
+.closeBtn {
+	position: absolute;
+	width: 20px;
+	height: 77px;
+	left: 17.2%; top : 52%;
+	z-index: 999;
+	display:none;
+	broder: 1px solid #999;
+}
+.centent {
+	position: absolute;
+	top: 85px;
+	bottom: 0px; 
+	min-height:460px;
+	_height:460px;
+	/*bottom: 22px;*//*??foot?*/
+}
+.navigation .menuU {
+	min-width: 370px;
+	_width: 370px;
+	max-width:530px;
+	height: 100%;
+}
+
+.navigation .nbtn {
+	heigth: 100%;
+	width: 12.5%;
+	margin-left: 0.4em;
+}
+/*************結果項***********/
+.dialog{
+	position:absolute;
+	top:74px;
+	right:60px;
+	padding:0px;
+	min-width:240px;
+	min-height:420px;
+	width:280px;
+	height:420px;
+	border:1px solid #666;
+	z-index:5640;
+	background:url(../images/heads/bg_shielding.png) ;
+}
+.filedDialog{
+	position:absolute;
+	top:50px;
+	right:60px;
+	padding:0px;
+	min-width:240px;
+	width:280px;
+	border:1px solid #666;
+	z-index:5640;
+	display:none;
+	background:url(../images/heads/bg_shielding.png) ;
+}
+#resultPage div{
+	padding-top:0px;
+}
+#resultTable tr{
+	height:14px;
+	overflow:hidden;
+}
+#filedTable{
+	font-size:0.8em;
+}
+#filedTable td{
+	border:1px solid #666;
+}
+/*****************************/
+.floot {
+	display:none;
+	height: 20px;
+	position: fixed;
+	bottom: 0;
+	border: 0;
+	z-index: 999;
+}
+
+.cententRight {
+	width: 100%;
+	height: 100%;
+}
+.cententLeft {
+	width: 17%;
+	height: 100%;
+	background:#eff9fa;
+}
+
+#divmap{
+	width:100%;
+	height:100%;
+	background:url() rgb(145, 185, 234);
+	float:left;
+	position:relative;
+}
+/****自能提示地址列表*****/
+.addressList{
+	display:block;
+	color:#666;
+	cursor:default;
+	height:26px;
+	line-height:32px;
+	padding:0px 0px 3px 5px;
+	font-family:微软雅黑;
+	font-size:13px;
+}
+.addressList:hover{
+	background:url() #BBFFFF
+;
+}
+/****地址提示框********/
+.addressHintDiv{
+	border:1px solid #ccc;
+	background:url() #fbfbff;
+	
+}
+/*********地圖切換樣式*********/
+#divmapswitchbar{
+ position:absolute; 
+ z-ndex:4098;
+ right: 35px;
+ top: 40px;
+}
+.mapButton{
+ float:left;
+ margin-left:10px;
+}
+.mapButton img{
+ width:34px;
+ height:34px;
+ cursor:pointer;
+ padding: 2px;
+ background: #fff;
+ border:1px solid #999;
+}
+ul.mapToolUl li {
+    padding: 2px;
+    padding-bottom:0px;
+    background: #fff;
+    margin: 2px;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+}
+/**???????**/
+.navaigationUl li{
+	width:120px;
+	padding:8px 0px 4px 0px ;
+	text-align:center;
+	height:14px;
+	font-size:13px;
+	font-weight:bolder;
+	cursor:pointer;
+	color:#fff;
+}
+.navaigationLi:hover{
+	background:url(../../images/heads/menubtn_h.png) no-repeat;
+}
+/**????????????**/
+.mapToolLi{
+	padding:0px;
+	line-height:15px;
+	cursor:pointer;
+}
+.mapToolLi:hover{
+	background:#459fe4;
+}
+/*************??????**********/
+.fnTab{
+	z-index:999;
+	top:120px;
+	right:30px;
+	background:url(../../images/heads/while_shielding.png) repeat;
+}
+.fnDiv{
+	width:230px;
+	text-align:left;
+}
+.tabLeft{
+	background:url() #03b5ef;
+	width:24px;
+	vertical-align: top;
+}
+.panlTab{
+	width:88%;
+	float:right;
+	margin-top:180px;
+	font-family:????;
+	font-size:12px;
+	font-weight:bold;
+}
+.panlTab div{
+	cursor:pointer;
+	margin-bottom:2px;
+	padding-top:10px;
+	padding-bottom:10px;
+	text-align:cneter;
+}
+.lableItem{
+	color:#fefefe;
+	background:url() #5dcef3;
+}
+.selectLableItem{
+	background:url() #feffff;
+	color:#03b5ef;
+}
+/******rightMenu*********/
+#rightMenu{
+	background:url() #fff;
+	font-family:微软雅黑;
+	font-size:13px;
+	border:1px solid #cecece;
+	-moz-box-shadow: 2px 2px 2px #ded8d8;
+    box-shadow: 2px 2px 2px #ded8d8;
+	color:#666;
+	padding:5px;
+	position:absolute;
+	display:none;
+	z-index:99;
+	top:0px;
+	left:0px;
+}
+#userPopup{
+	display:none;
+	position:absolute;
+	z-index:-1;
+	visibility: hidden;
+}
+/**********??????**************/
+.resultTab{
+	padding-top:5px;
+	width:230px;
+	overflow:hidden;
+}
+.resultTitle {
+	width:100%;
+}
+.resultTitle table{
+	width:100%;
+	font-family:????;
+	font-size:12px;
+	border:1px solid #999;
+}
+#resultCentext{
+	width:100%;
+	height:230px;
+	min-height:230px;
+	_height:230px;
+	max-height:300px;
+	overflow: hidden;
+	font-family:????;
+	font-size:12px;
+}
+#resultPaging{
+	font-family:????;
+	font-size:12px;
+}
+#resultPaging span{
+	cursor: default;
+}
+#last:hover, #next:hover{
+	color:blue;
+	text-decoration: underline;
+}
+#resultTable tr{
+	cursor:default;
+}
+#resultTable tr:hover{
+	background:url(../../images/heads/_8.png) repeat;
+}
+#resultTable td{
+	height:20px;
+	overflow:hidden;
+}
+/**********??????***************/
+@media screen and (max-device-width: 1100px) {
+	 .closeBtn {
+	    display:none;
+		left:202px;
+	}
+}
+
+/********************marker图标样式************************/
+span.vectorMarkerLabel{display:none!important;z-index:1200;}
+span.vectorMarkerLabel:hover{background-color:rgb(38, 109, 167)!important;display:none!important;}
+div.vector_marker:hover{background-color:rgb(249, 83, 8)!important;width:7px!important;height:7px!important;}
+div.iconImageDiv:hover .vectorMarkerLabel{display:block!important;}
+
+/******呼吸灯运用************/
+/*
+div.vector_marker{
+	box-shadow:0 1px 2px rgba(0,0,0,.3);
+	background-image:-webkit-gradient(linear,left top,left bottom,from(#6cc3fe),to(#21a1d0));
+	-webkit-animation-timing-function:ease-in-out;
+	-webkit-animation-name:breathe;
+	-webkit-animation-duration:700ms;
+	-webkit-animation-iteration-count:infinite;
+	-webkit-animation-direction:alternate;
+}}
+*/
+/*****************动态图例*********************/
+ul.cutlineList li {
+    width: 140px;
+    font-family: 微软雅黑;
+    float: left;
+}
+ul.cutlineList {
+    list-style: none;
+}
+
+/*******************呼吸灯**********************/
+@-webkit-keyframes breathe {
+	0% {
+	opacity:.7;
+	box-shadow:0 1px 2px rgba(255,255,255,0.1);
+}
+100% {
+	opacity:1;
+	border:1px solid rgba(59,235,235,1);
+	box-shadow:0 1px 30px rgba(59,255,255,1);
+}

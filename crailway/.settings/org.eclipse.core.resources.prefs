@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//WebRoot/WEB-INF/buildPage.jsp=UTF-8
+encoding//WebRoot/resources/css/index.css=UTF-8
+encoding//resources/fileupload.properties=UTF-8
+encoding//resources/jdbc.properties=UTF-8
+encoding//resources/log4j.properties=UTF-8
+encoding//resources/templet.properties=UTF-8
+encoding//util/qrcode/GucasQRCodeEncoder.java=gbk
+encoding//util/qrcode/Qrcode.java=gbk
+encoding//util/qrcode/UserEncoder.java=gbk
+encoding/<project>=UTF-8
